@@ -4,7 +4,6 @@ import mongoose, { ConnectOptions } from 'mongoose';
 dotenv.config();
 
 const MONGO_OPTIONS: ConnectOptions = {
-    // Remove the deprecated useNewUrlParser
     // useNewUrlParser: true,
     // Other options...
 };
@@ -29,7 +28,6 @@ const SERVER = {
     port: SERVER_PORT
 };
 
-// Add 'any' type casting here
 mongoose
     .connect(MONGO.url, MONGO.options as any)
     .then(() => {
