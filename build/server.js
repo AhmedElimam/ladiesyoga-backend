@@ -4,42 +4,54 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const http_1 = __importDefault(require("http"));
-const express_1 = __importDefault(require("express"));
 const body_parser_1 = __importDefault(require("body-parser"));
+const express_1 = __importDefault(require("express"));
 const logging_1 = __importDefault(require("./Source/config/logging"));
 const config_1 = __importDefault(require("./Source/config/config"));
-const sample_1 = __importDefault(require("./Source/routes/sample"));
+const book_1 = __importDefault(require("./Source/routes/book"));
+const mongoose_1 = __importDefault(require("mongoose"));
 const NAMESPACE = 'Server';
 const router = (0, express_1.default)();
-// Logging the request
+/** Connect to Mongo */
+mongoose_1.default
+    .connect(config_1.default.mongo.url, config_1.default.mongo.options)
+    .then((result) => {
+    logging_1.default.info(NAMESPACE, 'Mongo Connected');
+})
+    .catch((error) => {
+    logging_1.default.error(NAMESPACE, error.message, error);
+});
+/** Log the request */
 router.use((req, res, next) => {
-    logging_1.default.info(NAMESPACE, `METHOD - [${req.method}], URL-[${req.url}], IP - [${req.socket.remoteAddress}]`);
+    /** Log the req */
+    logging_1.default.info(NAMESPACE, `METHOD: [${req.method}] - URL: [${req.url}] - IP: [${req.socket.remoteAddress}]`);
     res.on('finish', () => {
-        logging_1.default.info(NAMESPACE, `METHOD - [${req.method}], URL-[${req.url}], IP - [${req.socket.remoteAddress}]`);
+        /** Log the res */
+        logging_1.default.info(NAMESPACE, `METHOD: [${req.method}] - URL: [${req.url}] - STATUS: [${res.statusCode}] - IP: [${req.socket.remoteAddress}]`);
     });
     next();
 });
-router.use(body_parser_1.default.urlencoded({ extended: false }));
+/** Parse the body of the request */
+router.use(body_parser_1.default.urlencoded({ extended: true }));
 router.use(body_parser_1.default.json());
-/** rules of endPoint  */
+/** Rules of our API */
 router.use((req, res, next) => {
     res.header('Access-Control-Allow-Origin', '*');
-    res.header('Access-Control-Allow-Origin', 'Origin, X-Request-With, Content-Type Accept, Authorization');
+    res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
     if (req.method == 'OPTIONS') {
-        res.header('Access-Control-Allow-Methods', 'GET PATCH DELETE POST');
+        res.header('Access-Control-Allow-Methods', 'PUT, POST, PATCH, DELETE, GET');
         return res.status(200).json({});
     }
     next();
 });
-// Routes
-router.use('/sample', sample_1.default);
-// Error handeling
+/** Routes go here */
+router.use('/ladies-yoga/api', book_1.default);
+/** Error handling */
 router.use((req, res, next) => {
-    const error = new Error(`Not found - ${req.originalUrl}`);
-    return res.status(404).json({
+    const error = new Error('Not found');
+    res.status(404).json({
         message: error.message
     });
 });
-// Create the Server */
 const httpServer = http_1.default.createServer(router);
-httpServer.listen(config_1.default.server.port, () => logging_1.default.info(NAMESPACE, `Server's Running on ${config_1.default.server.hostname}:${config_1.default.server.port}`));
+httpServer.listen(config_1.default.server.port, () => logging_1.default.info(NAMESPACE, `Server is running ${config_1.default.server.hostname}:${config_1.default.server.port}`));
