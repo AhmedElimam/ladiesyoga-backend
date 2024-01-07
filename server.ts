@@ -4,6 +4,7 @@ import express from 'express';
 import logging from './Source/config/logging';
 import config from './Source/config/config';
 import bookRouter from './Source/routes/book';
+import programRouter from './Source/routes/program';
 import mongoose from 'mongoose';
 
 const NAMESPACE = 'Server';
@@ -50,15 +51,21 @@ router.use((req, res, next) => {
 });
 
 /** Routes go here */
-router.use('/ladies-yoga/api', bookRouter);
+router.use('/uploads', express.static('uploads'));
+router.use('/ladies-yoga/api', bookRouter, programRouter);
 
 /** Error handling */
-router.use((req, res, next) => {
-    const error = new Error('Not found');
+router.use((error: Error, req: express.Request, res: express.Response, next: express.NextFunction) => {
+    if (error instanceof Error) {
+        logging.error(NAMESPACE, error.message, error);
 
-    res.status(404).json({
-        message: error.message
-    });
+        res.status(500).json({
+            message: 'Internal Server Error'
+        });
+    } else {
+        // Handle non-Error types if necessary
+        next(error);
+    }
 });
 
 const httpServer = http.createServer(router);
