@@ -3,21 +3,16 @@ import mongoose, { Document } from 'mongoose';
 import ProgramModel from '../models/program';
 import path from 'path';
 import multer from 'multer';
-
 // multer image upload
 const storage = multer.diskStorage({
-    destination: function (req, file, cb) {
-        cb(null, 'uploads/');
+    destination: (req, file, cb) => {
+        cb(null, 'assets'); // Adjust the destination folder as needed
     },
-    filename: function (req, file, cb) {
-        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
-        cb(null, file.fieldname + '-' + uniqueSuffix + path.extname(file.originalname));
+    filename: (req, file, cb) => {
+        cb(null, Date.now() + path.extname(file.originalname));
     }
 });
-
-const upload = multer({ storage: storage });
-
-const uploadImage = upload.single('image');
+const upload = multer({ storage: storage }).single('media');
 
 // Define the type from Program
 
@@ -27,32 +22,35 @@ interface ProgramDocument extends Document {
     description: string;
     category: string;
     subCategory?: string;
-    slug: string;
+    slug?: string;
     media: { media_link: { original: string } }[];
 }
 
 // POST A Program
-const createProgram = (req: Request, res: Response, next: NextFunction) => {
-    let { title, description, category, subCategory, slug } = req.body;
-
-    const program = new ProgramModel({
-        _id: new mongoose.Types.ObjectId(),
-        title,
-        description,
-        category,
-        slug,
-        subCategory
-    });
-
-    uploadImage(req, res, async (err) => {
+export const createProgram = (req: Request, res: Response, next: NextFunction) => {
+    upload(req, res, async (err) => {
         if (err) {
             console.error('Image upload error:', err);
             return res.status(500).json({ message: 'Image upload failed' });
         }
 
+        let { title, description, category, subCategory, slug } = req.body;
+
+        const program = new ProgramModel({
+            _id: new mongoose.Types.ObjectId(),
+            title,
+            description,
+            category,
+            slug,
+            subCategory,
+            media: []
+        });
+
         try {
             if (req.file) {
-                program.imageUrl = req.file.filename;
+                program.media.push({
+                    media_link: { original: req.file.filename }
+                });
             }
 
             const result = await program.save();
@@ -65,7 +63,8 @@ const createProgram = (req: Request, res: Response, next: NextFunction) => {
         }
     });
 };
-const getAllPrograms = (req: Request, res: Response, next: NextFunction) => {
+//get all programs
+export const getAllPrograms = (req: Request, res: Response, next: NextFunction) => {
     ProgramModel.find()
         .exec()
         .then((programs: ProgramDocument[]) => {
@@ -81,7 +80,6 @@ const getAllPrograms = (req: Request, res: Response, next: NextFunction) => {
             });
         });
 };
-
 const getProgramById = (req: Request, res: Response, next: NextFunction) => {
     const programId = req.params.id;
 
@@ -94,7 +92,6 @@ const getProgramById = (req: Request, res: Response, next: NextFunction) => {
             return res.status(200).json({ program });
         })
         .catch((error) => {
-            // Handle the error, e.g., log it
             console.error('Error fetching program by ID:', error);
             return res.status(500).json({ message: 'Internal Server Error' });
         });

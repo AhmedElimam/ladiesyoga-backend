@@ -1,11 +1,23 @@
-import { Document } from 'mongoose';
+// interface/program.ts
+import { Document, Model } from 'mongoose';
 
-export default interface Programs extends Document {
+export interface MediaLink {
+    media_link: {
+        original: string;
+    };
+}
+
+export interface ProgramDocument extends Document {
     title: string;
     description: string;
-    imageUrl?: string;
     category: string;
-    subcategory?: string;
-    slug: string;
+    subCategory?: string;
+    slug?: string;
     media: { media_link: { original: string } }[];
+    featured: boolean;
+}
+
+export interface ProgramModel extends Model<ProgramDocument> {
+    findBySlug(slug: string): Promise<ProgramDocument | null>;
+    findFeatured(): Promise<ProgramDocument[]>;
 }
