@@ -1,13 +1,20 @@
-// programModel.ts
-
 import mongoose, { Schema, Document, Model } from 'mongoose';
-import { ProgramDocument } from '../interface/program';
 import slugify from 'slugify';
 
-interface MediaLink {
+export interface MediaLink {
     media_link: {
         original: string;
     };
+}
+
+export interface ProgramDocument extends Document {
+    title: string;
+    description: string;
+    category: string;
+    subCategory?: string;
+    slug?: string;
+    media: MediaLink[];
+    featured: boolean;
 }
 
 const ProgramSchema: Schema<ProgramDocument> = new Schema({

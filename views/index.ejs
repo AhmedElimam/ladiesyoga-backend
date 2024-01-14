@@ -3,60 +3,15 @@
     <head>
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <title>File Upload and Program Creation Form</title>
+        <title>MVC</title>
     </head>
     <body>
-        <form id="programForm" enctype="multipart/form-data">
-            <!-- File input with name attribute set to 'media' -->
-            <label for="fileInput">Choose a file:</label>
-            <input type="file" name="media" id="fileInput" />
-
-            <!-- Other form fields for program creation -->
-            <label for="programTitle">Program Title:</label>
-            <input type="text" name="title" id="programTitle" />
-
-            <label for="programDescription">Program Description:</label>
-            <textarea name="description" id="programDescription"></textarea>
-
-            <label for="programCategory">Program Category:</label>
-            <input type="text" name="category" id="programCategory" />
-
-            <label for="programSubCategory">Program Subcategory:</label>
-            <input type="text" name="subCategory" id="programSubCategory" />
-
-            <label for="programFeatured">Featured:</label>
-            <input type="checkbox" name="featured" id="programFeatured" />
-
-            <!-- Submit button -->
-            <button type="button" onclick="submitForm()">Submit</button>
-        </form>
-
-        <script>
-            function submitForm() {
-                const form = document.getElementById('programForm');
-                const formData = new FormData(form);
-
-                // Make an AJAX request to handle form submission
-                const xhr = new XMLHttpRequest();
-                xhr.open('POST', '/ladies-yoga/api/create/program', true);
-
-                xhr.onload = function () {
-                    if (xhr.status === 200) {
-                        // Handle success
-                        console.log('Success:', xhr.responseText);
-                    } else {
-                        // Handle error
-                        console.error('Error:', xhr.status, xhr.statusText);
-                    }
-                };
-
-                xhr.onerror = function () {
-                    // Handle network error
-                    console.error('Network error');
-                };
-
-                xhr.send(formData);
-            }
-        </script>
+        <script
+            src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"
+            integrity="sha512-v2CJ7UaYy4JwqLDIrZUI/4hqeoQieOmAZNXBeQyjo21dadnwR+8ZaIJVT8EE2iyI61OV8e6M8PP2/4hpQINQ/g=="
+            crossorigin="anonymous"
+            referrerpolicy="no-referrer"
+        ></script>
+        <script></script>
     </body>
 </html>
